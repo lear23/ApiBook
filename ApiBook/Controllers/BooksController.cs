@@ -1,13 +1,18 @@
 ﻿using Infrastructure.Contexts;
 using Infrastructure.Dtos;
 using Infrastructure.Entities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace ApiBook.Controllers
 {
+    
+
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class BooksController : ControllerBase
     {
@@ -53,21 +58,21 @@ namespace ApiBook.Controllers
 
         #region GET
         [HttpGet]
-
+        [Route("List")]
         public async Task<IActionResult> GetAll()
         {
-            var courses = await _context.Books.ToListAsync();
-            return Ok(courses);
+            var books = await _context.Books.ToListAsync();
+            return Ok(books);
         }
 
         [HttpGet("{id}")]
 
         public async Task<IActionResult> GetOne(Guid id)
         {
-            var courseEntity = await _context.Books.FirstOrDefaultAsync(x => x.Id == id);
-            if (courseEntity != null)
+            var bookEntity = await _context.Books.FirstOrDefaultAsync(x => x.Id == id);
+            if (bookEntity != null)
             {
-                return Ok(courseEntity);
+                return Ok(bookEntity);
             }
             return NotFound();
         }
