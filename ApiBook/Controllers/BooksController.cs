@@ -9,22 +9,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ApiBook.Controllers
 {
-    
-
     [Route("api/[controller]")]
-    [Authorize]
+    //[Authorize]
     [ApiController]
     public class BooksController : ControllerBase
     {
-
         private readonly AppDbContext _context;
 
         public BooksController(AppDbContext context)
         {
             _context = context;
         }
-
-
 
         #region CREATE
         [HttpPost]
@@ -36,23 +31,20 @@ namespace ApiBook.Controllers
                 {
                     var bookEntity = new BookEntity
                     {
-                       
-                      Title = dto.Title,
-                      Description = dto.Description,
-                      Author = dto.Author,
-                      PublicationDate = dto.PublicationDate,
-                      ImageName = dto.ImageName,
-
-
+                        Title = dto.Title,
+                        Description = dto.Description,
+                        Author = dto.Author,
+                        ImageName = dto.ImageName
                     };
+
                     _context.Books.Add(bookEntity);
                     await _context.SaveChangesAsync();
-                    return Created("", null);
+                    return CreatedAtAction(nameof(GetOne), new { id = bookEntity.Id }, bookEntity);
                 }
 
-                return Conflict();
+                return Conflict("A book with this title already exists.");
             }
-            return BadRequest();
+            return BadRequest(ModelState);
         }
         #endregion
 
@@ -62,11 +54,10 @@ namespace ApiBook.Controllers
         public async Task<IActionResult> GetAll()
         {
             var books = await _context.Books.ToListAsync();
-            return Ok(books);
+            return Ok(new { value = books });
         }
 
         [HttpGet("{id}")]
-
         public async Task<IActionResult> GetOne(Guid id)
         {
             var bookEntity = await _context.Books.FirstOrDefaultAsync(x => x.Id == id);
@@ -79,9 +70,8 @@ namespace ApiBook.Controllers
         #endregion
 
         #region UPDATE
-
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id,  BookDto dto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] BookDto dto)
         {
             if (ModelState.IsValid)
             {
@@ -91,38 +81,32 @@ namespace ApiBook.Controllers
                     book.Title = dto.Title;
                     book.Description = dto.Description;
                     book.Author = dto.Author;
-                    book.PublicationDate = dto.PublicationDate;
                     book.ImageName = dto.ImageName;
-                  
 
                     _context.Books.Update(book);
                     await _context.SaveChangesAsync();
 
-                    return Ok();
+                    return Ok(book);
                 }
                 return NotFound();
             }
-            return BadRequest();
+            return BadRequest(ModelState);
         }
-
         #endregion
 
-
-        #region Delete
+        #region DELETE
         [HttpDelete("{id}")]
-
         public async Task<IActionResult> Delete(Guid id)
         {
-            var course = await _context.Quotes.FirstOrDefaultAsync(x => x.Id == id);
-            if (course != null)
+            var book = await _context.Books.FirstOrDefaultAsync(x => x.Id == id);
+            if (book != null)
             {
-                _context.Quotes.Remove(course);
+                _context.Books.Remove(book);
                 await _context.SaveChangesAsync();
-                return Ok();
+                return NoContent();
             }
             return NotFound();
         }
         #endregion
-
     }
 }

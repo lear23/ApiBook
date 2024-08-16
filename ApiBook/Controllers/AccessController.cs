@@ -21,6 +21,15 @@ namespace ApiBook.Controllers
         [Route("Register")]
         public async Task<IActionResult> Register(ClientDto dto)
         {
+            var existingClient = await _context.Clients
+               .Where(c => c.Email == dto.Email)
+               .FirstOrDefaultAsync();
+
+            if (existingClient != null)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new { isSuccess = false, message = "Email already in use." });
+            }
+
             var modelUser = new ClientEntity
             {
 

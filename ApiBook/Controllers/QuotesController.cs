@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace ApiBook.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize]
+    //[Authorize]
     [ApiController]
     public class QuotesController(AppDbContext context) : ControllerBase
     {
@@ -38,7 +38,7 @@ namespace ApiBook.Controllers
             {
                 _context.Quotes.Add(quoteEntity);
                 await _context.SaveChangesAsync();
-                return CreatedAtAction(nameof(Create), new { id = quoteEntity.Id }, quoteEntity);
+                return CreatedAtAction(nameof(GetOne), new { id = quoteEntity.Id }, quoteEntity);
             }
             catch (Exception ex)
             {
@@ -51,7 +51,7 @@ namespace ApiBook.Controllers
 
         #region GETALL
         [HttpGet]
-       
+        [Route("List")]
         public async Task<IActionResult> GetAll()
         {
             var quotes = await _context.Quotes.ToListAsync();
@@ -66,7 +66,7 @@ namespace ApiBook.Controllers
 
         public async Task<IActionResult> GetOne(Guid id)
         {
-            var quoteEntity = await _context.Books.FirstOrDefaultAsync(x => x.Id == id);
+            var quoteEntity = await _context.Quotes.FirstOrDefaultAsync(x => x.Id == id);
             if (quoteEntity != null)
             {
                 return Ok(quoteEntity);
@@ -87,7 +87,6 @@ namespace ApiBook.Controllers
                 {
                     quote.Text = dto.Text;
                     quote.Author = dto.Author;
-                    quote.ClientId = dto.ClientId;
 
 
                     _context.Quotes.Update(quote);
