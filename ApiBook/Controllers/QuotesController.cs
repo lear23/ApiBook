@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace ApiBook.Controllers
 {
     [Route("api/[controller]")]
-    //[Authorize]
+    [Authorize]
     [ApiController]
     public class QuotesController(AppDbContext context) : ControllerBase
     {

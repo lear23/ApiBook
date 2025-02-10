@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace ApiBook.Controllers
 {
     [Route("api/[controller]")]
-    //[Authorize]
+    [Authorize]
     [ApiController]
     public class BooksController : ControllerBase
     {
@@ -21,9 +21,10 @@ namespace ApiBook.Controllers
             _context = context;
         }
 
+
         #region CREATE
         [HttpPost]
-        public async Task<IActionResult> Create(BookDto dto)
+        public async Task<IActionResult> Create([FromForm] BookDto dto, IFormFile? imageFile)
         {
             if (ModelState.IsValid)
             {
@@ -34,7 +35,8 @@ namespace ApiBook.Controllers
                         Title = dto.Title,
                         Description = dto.Description,
                         Author = dto.Author,
-                        ImageName = dto.ImageName
+                        PublicationDate = dto.PublicationDate,
+                        ImageName = imageFile != null ? await SaveImageAsync(imageFile) : null
                     };
 
                     _context.Books.Add(bookEntity);
@@ -46,6 +48,21 @@ namespace ApiBook.Controllers
             }
             return BadRequest(ModelState);
         }
+
+
+        private static async Task<string> SaveImageAsync(IFormFile imageFile)
+        {
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+            var filePath = Path.Combine("wwwroot/uploads", fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
+            }
+
+            return fileName;
+        }
+
         #endregion
 
         #region GET
@@ -81,6 +98,7 @@ namespace ApiBook.Controllers
                     book.Title = dto.Title;
                     book.Description = dto.Description;
                     book.Author = dto.Author;
+                    book.PublicationDate = dto.PublicationDate;
                     book.ImageName = dto.ImageName;
 
                     _context.Books.Update(book);

@@ -2,6 +2,7 @@ using ApiBook.Configurations;
 using Infrastructure.Contexts;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -50,6 +51,13 @@ app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 app.UseCors("NewPolicy");
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images")),
+    RequestPath = "/images",
+    ServeUnknownFileTypes = true,
+    DefaultContentType = "application/octet-stream"
+});
 app.UseAuthentication();
 app.UseAuthorization();
 
